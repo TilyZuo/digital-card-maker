@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "name": "digital-card-maker",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "stripe": "^17.5.0"
+  }
+}

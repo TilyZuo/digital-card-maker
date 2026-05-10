@@ -409,6 +409,98 @@
   }
   .share-close:hover { color: #1f3a25; }
 
+  /* ============== PAYWALL MODAL ============== */
+  .paywall-modal {
+    position: fixed; inset: 0;
+    background: rgba(20, 16, 12, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 350;
+    transition: background 0.3s ease, backdrop-filter 0.3s ease;
+  }
+  .paywall-modal.show {
+    display: flex;
+    background: rgba(20, 16, 12, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .paywall-card {
+    background: #faf5ed;
+    border-radius: 14px;
+    padding: 36px 36px 24px;
+    width: 400px;
+    max-width: 90vw;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.42);
+    position: relative;
+    text-align: center;
+  }
+  .paywall-eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: rgba(31,58,37,0.55);
+    margin-bottom: 6px;
+  }
+  .paywall-title {
+    font-family: 'Pinyon Script', cursive;
+    font-size: 42px;
+    color: #1f3a25;
+    margin: 0 0 14px;
+    line-height: 1;
+  }
+  .paywall-price {
+    margin: 0 0 14px;
+    line-height: 1;
+  }
+  .paywall-amount {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 52px;
+    color: #1f3a25;
+    letter-spacing: -0.02em;
+  }
+  .paywall-currency {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: rgba(31,58,37,0.55);
+    margin-left: 6px;
+  }
+  .paywall-body {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: rgba(31,58,37,0.7);
+    line-height: 1.55;
+    margin-bottom: 20px;
+    padding: 0 8px;
+  }
+  .paywall-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .paywall-actions .btn { width: 100%; text-align: center; }
+  .paywall-foot {
+    margin-top: 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: rgba(31,58,37,0.45);
+    letter-spacing: 0.04em;
+  }
+  .paywall-close {
+    position: absolute; top: 14px; right: 14px;
+    background: transparent; border: none;
+    font-size: 20px; color: rgba(31,58,37,0.5);
+    cursor: pointer; line-height: 1;
+    padding: 4px 8px;
+  }
+  .paywall-close:hover { color: #1f3a25; }
+
   /* --- Receiver mode: hide editor, show only the card --- */
   body.receiver-mode .editor { display: none; }
   body.receiver-mode main { grid-template-columns: 1fr; }
@@ -1174,6 +1266,23 @@
   </div>
 </div>
 
+<div class="paywall-modal" id="paywallModal">
+  <div class="paywall-card">
+    <button class="paywall-close" id="paywallClose" aria-label="Close">×</button>
+    <div class="paywall-eyebrow" data-i18n="paywallEyebrow">One-time unlock</div>
+    <h2 class="paywall-title" data-i18n="paywallTitle">Send this card</h2>
+    <div class="paywall-price">
+      <span class="paywall-amount">$1</span><span class="paywall-currency">USD</span>
+    </div>
+    <div class="paywall-body" data-i18n="paywallBody">Unlock share &amp; download for this card. One-time, this card only.</div>
+    <div class="paywall-actions">
+      <button class="btn btn-primary" id="paywallContinue" data-i18n="paywallContinue">Continue to Stripe →</button>
+      <button class="btn btn-secondary" id="paywallCancel" data-i18n="paywallCancel">Maybe later</button>
+    </div>
+    <div class="paywall-foot" data-i18n="paywallFoot">Secure payment via Stripe · we never see your card</div>
+  </div>
+</div>
+
 <div class="receiver-cta">
   <button class="btn-replay" id="replayBtn">✦ Open the envelope again</button>
   <a class="btn-makeown" href="?" id="makeOwnLink">Make your own ↗</a>
@@ -1218,6 +1327,15 @@
       shareNote1: "Keep it private — only share with the person you made it for.",
       shareNote2: "The card data lives in the link itself, nothing's saved anywhere.",
       shareNoteLongUrl: "(Heads up: your photo makes this link long. Some apps may struggle — email or WhatsApp work best.)",
+      paywallEyebrow: "One-time unlock",
+      paywallTitle: "Send this card",
+      paywallBody: "Unlock share & download for this card. One-time, this card only.",
+      paywallContinue: "Continue to Stripe →",
+      paywallCancel: "Maybe later",
+      paywallFoot: "Secure payment via Stripe · we never see your card",
+      paywallOpening: "Opening checkout…",
+      paywallError: "Couldn't start checkout — try again",
+      paywallUnlocked: "Card unlocked ✓",
       promptSetA: [
         { label: 'The suitcase', placeholder: "What did mom slip into your bag last time you went home — something you didn't really need? What did she say? Did it end up useful?" },
         { label: 'A dish', placeholder: "A dish she makes that you've never learned to cook. Describe the taste, or one moment when you missed it most…" },
@@ -1268,6 +1386,15 @@
       shareNote1: "请只分享给收件人 — 这是为她做的。",
       shareNote2: "卡片数据全部编在链接里, 不存任何后端。",
       shareNoteLongUrl: "(注意:含照片时链接会很长。建议用邮件或微信发,部分应用可能截断。)",
+      paywallEyebrow: "一次性解锁",
+      paywallTitle: "寄出这张卡",
+      paywallBody: "$1 解锁这张卡的分享与下载,仅本张有效。",
+      paywallContinue: "前往 Stripe 支付 →",
+      paywallCancel: "稍后再说",
+      paywallFoot: "Stripe 安全支付 · 我们不接触你的卡片信息",
+      paywallOpening: "正在跳转…",
+      paywallError: "无法发起支付, 请重试",
+      paywallUnlocked: "已解锁 ✓",
       promptSetA: [
         { label: '行李箱', placeholder: '上次回家妈给你塞了什么你其实不需要的东西? 她当时是怎么说的? 你后来用上了吗?' },
         { label: '一道菜', placeholder: '她做的某道菜你一直没学会, 每次想到就软一下心。写写它的味道、你最想念它的某个瞬间…' },
@@ -1763,6 +1890,7 @@
   /* ============== DOWNLOAD ============== */
   document.getElementById('downloadBtn').addEventListener('click', async (e) => {
     const btn = e.currentTarget;
+    if (!(await requireUnlock('download'))) return;
     btn.textContent = t('btnDownloading');
     btn.disabled = true;
     try {
@@ -1902,7 +2030,8 @@
     return base + '#card=' + encoded;
   }
 
-  shareBtn.addEventListener('click', () => {
+  shareBtn.addEventListener('click', async () => {
+    if (!(await requireUnlock('share'))) return;
     const url = buildShareURL();
     shareUrlBox.textContent = url;
     shareModal.classList.add('show');
@@ -1939,12 +2068,110 @@
     window.open(buildShareURL(), '_blank');
   });
 
+  /* ============== PAYWALL ($1 unlock per card) ============== */
+  // Hash the editable state into a stable cardId. Same content → same id.
+  async function getCardId() {
+    const state = {
+      r: recipientInput.value || '',
+      m: messageInput.value || '',
+      s: senderInput.value || '',
+      f: [...selectedFlowers].sort(),
+    };
+    if (userPhoto) state.p = userPhoto.length + ':' + userPhoto.slice(0, 64);
+    const data = new TextEncoder().encode(JSON.stringify(state));
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
+  }
+  function getUnlocks() {
+    try { return JSON.parse(localStorage.getItem('unlocks') || '{}'); } catch { return {}; }
+  }
+  function isUnlocked(cardId) { return !!getUnlocks()[cardId]; }
+  function saveUnlock(cardId) {
+    const u = getUnlocks();
+    u[cardId] = Date.now();
+    try { localStorage.setItem('unlocks', JSON.stringify(u)); } catch {}
+  }
+
+  const paywallModal = document.getElementById('paywallModal');
+  const paywallCloseBtn = document.getElementById('paywallClose');
+  const paywallCancelBtn = document.getElementById('paywallCancel');
+  const paywallContinueBtn = document.getElementById('paywallContinue');
+  let pendingPaywall = null;  // { cardId, action } while modal is open
+
+  function openPaywall(cardId, action) {
+    pendingPaywall = { cardId, action };
+    paywallContinueBtn.textContent = t('paywallContinue');
+    paywallContinueBtn.disabled = false;
+    paywallModal.classList.add('show');
+  }
+  function closePaywall() {
+    paywallModal.classList.remove('show');
+    pendingPaywall = null;
+  }
+  paywallCloseBtn.addEventListener('click', closePaywall);
+  paywallCancelBtn.addEventListener('click', closePaywall);
+  paywallModal.addEventListener('click', e => {
+    if (e.target === paywallModal) closePaywall();
+  });
+
+  paywallContinueBtn.addEventListener('click', async () => {
+    if (!pendingPaywall) return;
+    const { cardId, action } = pendingPaywall;
+    paywallContinueBtn.disabled = true;
+    paywallContinueBtn.textContent = t('paywallOpening');
+    // Snapshot full editor state so the post-Stripe redirect can restore it
+    try {
+      const snapshot = {
+        r: recipientInput.value,
+        m: messageInput.value,
+        s: senderInput.value,
+        f: selectedFlowers,
+        p: userPhoto,
+        l: currentLang,
+      };
+      localStorage.setItem('pendingState', JSON.stringify(snapshot));
+    } catch {}
+    try {
+      const r = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardId, action, lang: currentLang }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.url) throw new Error(data.error || 'Checkout failed');
+      location.href = data.url;
+    } catch (e) {
+      console.error(e);
+      paywallContinueBtn.textContent = t('paywallError');
+      paywallContinueBtn.disabled = false;
+    }
+  });
+
+  // Gate function used by Share + Download
+  async function requireUnlock(action) {
+    const cardId = await getCardId();
+    if (isUnlocked(cardId)) return true;
+    openPaywall(cardId, action);
+    return false;
+  }
+
   /* ============== RECEIVER MODE ============== */
-  // If URL has #card= data, hide editor and auto-open envelope
-  const initialState = parseURLState();
+  // If URL has #card= data, hide editor and auto-open envelope.
+  // Skip receiver mode entirely if we're returning from a Stripe checkout (?paid=cs_...)
+  const paidSessionParam = new URLSearchParams(location.search).get('paid');
+  const initialState = paidSessionParam ? null : parseURLState();
   if (initialState) {
     document.body.classList.add('receiver-mode');
     applyState(initialState);
+  } else if (paidSessionParam) {
+    // Restore the editor state the sender was working on before redirect
+    try {
+      const pending = JSON.parse(localStorage.getItem('pendingState') || 'null');
+      if (pending) {
+        applyState(pending);
+        localStorage.removeItem('pendingState');
+      }
+    } catch {}
   }
 
   // Replay button (in receiver mode)
@@ -1964,6 +2191,29 @@
   renderCard();
   regenerateParticles();
   applyLanguage(currentLang);   // re-pass: swap static labels + re-render dynamic UI in the saved language
+
+  // After Stripe redirect: verify the session, save unlock for this card, auto-resume the action
+  if (paidSessionParam) {
+    (async () => {
+      try {
+        const r = await fetch('/api/verify?session_id=' + encodeURIComponent(paidSessionParam));
+        if (!r.ok) throw new Error('verify failed: ' + r.status);
+        const { ok, cardId, action } = await r.json();
+        if (!ok || !cardId) throw new Error('verify response invalid');
+        saveUnlock(cardId);
+        // Clean the URL so a refresh doesn't re-verify
+        history.replaceState(null, '', location.pathname + location.hash);
+        showToast(t('paywallUnlocked'));
+        // Auto-resume the action the sender originally clicked
+        setTimeout(() => {
+          if (action === 'share') document.getElementById('shareBtn').click();
+          else if (action === 'download') document.getElementById('downloadBtn').click();
+        }, 500);
+      } catch (e) {
+        console.error('payment verify failed', e);
+      }
+    })();
+  }
 
   // In receiver mode, automatically open the envelope after a brief moment
   if (initialState) {
