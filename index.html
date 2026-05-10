@@ -92,10 +92,33 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    gap: 16px;
     animation: slideDown 0.8s cubic-bezier(.2,.8,.3,1) both;
     position: relative;
     z-index: 10;
   }
+  .lang-switch {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+    background: transparent;
+  }
+  .lang-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 6px 14px;
+    background: transparent;
+    color: var(--ink-soft);
+    border: 0;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .lang-btn + .lang-btn { border-left: 1px solid var(--line); }
+  .lang-btn:hover { color: var(--ink); }
+  .lang-btn.active { background: var(--ink); color: var(--cream); }
   .brand {
     font-family: 'Fraunces', serif;
     font-weight: 400;
@@ -536,12 +559,14 @@
     height: 660px;
     overflow: hidden;
     flex-shrink: 0;
-    /* Soft watercolor-blob gradient — colors driven by selected flowers via CSS vars */
+    /* Soft watercolor-blob gradient — colors driven by selected flowers via CSS vars.
+       Paper-grain texture sits between the blobs and the flat base color. */
     background:
       radial-gradient(ellipse 80% 65% at 25% 28%, var(--bg-blob-1, rgba(255,230,235,0.45)) 0%, transparent 70%),
       radial-gradient(ellipse 70% 60% at 80% 22%, var(--bg-blob-2, rgba(255,215,200,0.40)) 0%, transparent 70%),
       radial-gradient(ellipse 75% 70% at 75% 75%, var(--bg-blob-3, rgba(255,195,210,0.35)) 0%, transparent 70%),
       radial-gradient(ellipse 70% 65% at 20% 78%, var(--bg-blob-4, rgba(255,240,230,0.45)) 0%, transparent 70%),
+      url('paper.jpg') center / cover,
       var(--bg-base, #fff7f3);
   }
   /* Card back: same gradient backdrop as front (no more ruled-line stationery) */
@@ -969,6 +994,24 @@
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
 
+  /* ============== INLINE PREVIEWS (mobile only — shown by media query below) ============== */
+  .step-preview {
+    display: none;
+    width: 100%;
+    justify-content: center;
+    margin: 20px 0 4px;
+  }
+  .step-preview-hint {
+    display: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ink-soft);
+    text-align: center;
+    margin: 14px 12px 4px;
+    opacity: 0.85;
+  }
+
   /* ============== RESPONSIVE ============== */
   @media (max-width: 980px) {
     main { grid-template-columns: 1fr; }
@@ -978,13 +1021,59 @@
     .bouquet .bouquet-stage { width: 280px; height: 360px; }
     header { padding: 20px 24px; }
   }
+
+  /* ---- Phone tier ---- */
+  @media (max-width: 600px) {
+    header { padding: 16px 20px 14px; }
+    .editor { padding: 22px 20px 32px; max-height: none; border-right: none; border-bottom: none; }
+
+    /* Replace the side-canvas with two inline previews that follow the editing steps */
+    .canvas { display: none; }
+    .step-preview { display: flex; }
+    .step-preview-hint { display: block; }
+
+    /* Each preview shows only one side of the spread */
+    #previewFront .card-back { display: none; }
+    #previewBack .card-front { display: none; }
+
+    /* Each preview slot is itself the .card.bouquet container — override its default spread width */
+    #previewFront, #previewBack {
+      width: calc(480px * 0.62);
+      height: calc(660px * 0.62);
+      margin: 18px auto 6px;
+    }
+
+    /* Bigger bouquet illustration — ~4/5 of card height */
+    .bouquet .bouquet-stage { width: 440px; height: 520px; bottom: 30px; }
+
+    /* Reveal — single-side card defaults are still 300×420 */
+    .card { width: 300px; height: 420px; }
+    .card-content { padding: 24px 20px; }
+
+    /* Envelope reveal — fit phone viewport, retune the lift offsets */
+    .envelope-stage { width: 100vw; height: 78vh; max-height: none; }
+    .envelope { width: 280px; height: 192px; bottom: -50px; }
+    .env-seal { width: 60px; height: 60px; font-size: 21px; }
+    .env-card-slot .card-spread { transform: scale(0.34); }
+    .envelope.opened .env-card-slot {
+      transform: translateX(calc(-50% + 80px)) translateY(-285px);
+    }
+    .envelope.unfolded .env-card-slot {
+      transform: translateX(-50%) translateY(-156px);
+    }
+    .reveal-close { top: 16px; right: 16px; width: 36px; height: 36px; font-size: 19px; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <div class="brand"><span>For</span> <em>Her</em></div>
-  <div class="tagline">A Mother's Day Card Studio</div>
+  <div class="tagline" data-i18n="tagline">A Mother's Day Card Studio</div>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button class="lang-btn active" data-lang="en">EN</button>
+    <button class="lang-btn" data-lang="zh">中</button>
+  </div>
 </header>
 
 <main>
@@ -994,46 +1083,49 @@
     <div class="step">
       <div class="step-label">
         <span class="step-num">i.</span>
-        <span class="step-title">Choose your flowers</span>
+        <span class="step-title" data-i18n="step1_title">Choose your flowers</span>
       </div>
-      <div class="step-hint">Each flower carries a meaning · 每朵花都有它的寓意</div>
+      <div class="step-hint" data-i18n="step1_hint">Each flower carries a meaning</div>
       <div class="flowers" id="flowers"></div>
-      <div class="flower-counter"><strong id="flowerCount">1</strong> flower<span id="flowerPlural"></span> selected · used in your bouquet</div>
+      <div class="flower-counter" id="flowerCounter"><strong id="flowerCount">1</strong> <span id="flowerCounterText">flower selected · used in your bouquet</span></div>
+      <div class="step-preview" id="previewFront" aria-hidden="true"></div>
     </div>
 
     <!-- Step ii: Personalize -->
     <div class="step">
       <div class="step-label">
         <span class="step-num">ii.</span>
-        <span class="step-title">Make it personal</span>
+        <span class="step-title" data-i18n="step2_title">Make it personal</span>
       </div>
       <div class="field">
-        <label for="recipient">To</label>
+        <label for="recipient" data-i18n="fieldTo">To</label>
         <input id="recipient" type="text" value="Mom" maxlength="24" />
       </div>
       <div class="field">
-        <label for="message">Your message</label>
+        <label for="message" data-i18n="fieldMsg">Your message</label>
         <textarea id="message" maxlength="220">Thank you for every quiet sacrifice, every late-night call, every meal made with love.</textarea>
         <div class="char-count"><span id="count">0</span> / 220</div>
-        <div class="prompt-hint">不知道写什么? 挑一个角度入手:</div>
+        <div class="prompt-hint" data-i18n="promptHint">Stuck? Pick an angle:</div>
         <div class="prompt-chips" id="promptChips"></div>
       </div>
       <div class="field">
-        <label for="sender">From</label>
+        <label for="sender" data-i18n="fieldFrom">From</label>
         <input id="sender" type="text" value="Tilly" maxlength="20" />
       </div>
+      <div class="step-preview-hint" data-i18n="photoHint">📸 Tap the Polaroid below to add a photo with mom</div>
+      <div class="step-preview" id="previewBack" aria-hidden="true"></div>
     </div>
 
     <!-- Step iv: Send -->
     <div class="step">
       <div class="step-label">
         <span class="step-num">iii.</span>
-        <span class="step-title">Send it into the world</span>
+        <span class="step-title" data-i18n="step3_title">Send it into the world</span>
       </div>
       <div class="actions">
-        <button class="btn btn-primary" id="shareBtn">✦ Share with Mom →</button>
-        <button class="btn btn-reveal" id="revealBtn">Preview the unboxing</button>
-        <button class="btn btn-secondary" id="downloadBtn">Download as image</button>
+        <button class="btn btn-primary" id="shareBtn" data-i18n="btnShare">✦ Share with Mom →</button>
+        <button class="btn btn-reveal" id="revealBtn" data-i18n="btnReveal">Preview the unboxing</button>
+        <button class="btn btn-secondary" id="downloadBtn" data-i18n="btnDownload">Download as image</button>
       </div>
     </div>
 
@@ -1059,25 +1151,25 @@
       <div class="env-flap"></div>
       <div class="env-seal" id="envSeal">M</div>
     </div>
-    <div class="reveal-hint" id="revealHint">tap the seal to open ✦</div>
+    <div class="reveal-hint" id="revealHint" data-i18n="revealHint">tap the seal to open ✦</div>
   </div>
 </div>
 
-<div class="toast" id="toast">Image downloaded ✓</div>
+<div class="toast" id="toast" data-i18n="toastDownload">Image downloaded ✓</div>
 
 <div class="share-modal" id="shareModal">
   <div class="share-card">
     <button class="share-close" id="shareClose" aria-label="Close">×</button>
-    <h2>Your card is ready ✦</h2>
-    <div class="share-sub">Send this link to your mom — opening it shows her the envelope.</div>
+    <h2 data-i18n="shareTitle">Your card is ready ✦</h2>
+    <div class="share-sub" data-i18n="shareSub">Send this link to your mom — opening it shows her the envelope.</div>
     <div class="share-url-box" id="shareUrlBox">…</div>
     <div class="share-actions">
-      <button class="btn btn-primary" id="copyShareBtn">Copy link</button>
-      <button class="btn btn-secondary" id="previewShareBtn">Preview as Mom (new tab) ↗</button>
+      <button class="btn btn-primary" id="copyShareBtn" data-i18n="btnCopyLink">Copy link</button>
+      <button class="btn btn-secondary" id="previewShareBtn" data-i18n="btnPreviewAsMom">Preview as Mom (new tab) ↗</button>
     </div>
-    <div class="share-note">
-      Keep it private — only share with the person you made it for.<br>
-      The card data lives in the link itself, nothing's saved anywhere.
+    <div class="share-note" id="shareNote">
+      <span data-i18n="shareNote1">Keep it private — only share with the person you made it for.</span><br>
+      <span data-i18n="shareNote2">The card data lives in the link itself, nothing's saved anywhere.</span>
     </div>
   </div>
 </div>
@@ -1090,6 +1182,143 @@
 <script>
   // SVG noise filter for grain texture (reused)
   const grainSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3"/><feColorMatrix values="0 0 0 0 0.4  0 0 0 0 0.3  0 0 0 0 0.25  0 0 0 0.35 0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>`;
+
+  /* ============== i18n ============== */
+  const i18n = {
+    en: {
+      tagline: "A Mother's Day Card Studio",
+      step1_title: "Choose your flowers",
+      step1_hint: "Each flower carries a meaning",
+      flowerCounterText: (n) => (n === 1 ? 'flower selected · used in your bouquet' : 'flowers selected · used in your bouquet'),
+      step2_title: "Make it personal",
+      fieldTo: "To",
+      fieldMsg: "Your message",
+      fieldFrom: "From",
+      promptHint: "Stuck? Pick an angle:",
+      promptCycle: "Try another set ↻",
+      step3_title: "Send it into the world",
+      btnShare: "✦ Share with Mom →",
+      btnReveal: "Preview the unboxing",
+      btnDownload: "Download as image",
+      btnDownloading: "Rendering…",
+      photoHint: "📸 Tap the Polaroid below to add a photo with mom",
+      polaroidAdd: "+ add a photo<br>with mom",
+      polaroidTapUpload: "tap to upload",
+      polaroidWithMom: "us ♡",
+      backGreeting: (r) => `Dear ${r},`,
+      backSignature: "— with love,",
+      revealHint: "tap the seal to open ✦",
+      toastDownload: "Image downloaded ✓",
+      shareTitle: "Your card is ready ✦",
+      shareSub: "Send this link to your mom — opening it shows her the envelope.",
+      btnCopyLink: "Copy link",
+      btnCopied: "Copied ✓",
+      btnCopyManual: "Press Cmd/Ctrl+C",
+      btnPreviewAsMom: "Preview as Mom (new tab) ↗",
+      shareNote1: "Keep it private — only share with the person you made it for.",
+      shareNote2: "The card data lives in the link itself, nothing's saved anywhere.",
+      shareNoteLongUrl: "(Heads up: your photo makes this link long. Some apps may struggle — email or WhatsApp work best.)",
+      promptSetA: [
+        { label: 'The suitcase', placeholder: "What did mom slip into your bag last time you went home — something you didn't really need? What did she say? Did it end up useful?" },
+        { label: 'A dish', placeholder: "A dish she makes that you've never learned to cook. Describe the taste, or one moment when you missed it most…" },
+        { label: 'Her quirks', placeholder: "The funniest meme she's sent you recently, or an app she can't quite figure out. She's behind the times but still trying to keep up with you…" },
+        { label: 'A small thing', placeholder: "Something tiny you've always taken for granted and never properly thanked her for. Picking out the veggies you don't like, plugging in your charger at night…" },
+        { label: 'Becoming her', placeholder: "Something you did recently and suddenly thought 'huh, mom does this too.' A phrase, a habit, a way of folding the laundry…" },
+        { label: 'Unsaid words', placeholder: "Something you've wanted to tell her for ages but never found the moment for. Today, this card can be the moment…" }
+      ],
+      promptSetB: [
+        { label: 'Her younger self', placeholder: "A photo of her from when she was young — is there one that hits you? What was she doing, how was she smiling?" },
+        { label: 'A question she asked', placeholder: "Something she's asked you recently — 'how do I send money on WeChat,' 'have you lost weight,' 'when will you be home tonight.' What did you feel hearing it?" },
+        { label: 'A thing she stopped', placeholder: "Something she used to do and doesn't anymore. Staying up to watch dramas, arguing about being right, wearing her favorite dress…" },
+        { label: 'What made her smile', placeholder: "When did you last do something that really made her happy? A call, a photo, 'I'll come home for dinner this week'?" },
+        { label: 'Just one line', placeholder: "If you could tell her only one sentence this year, what would you want her to remember? The more specific, the more real." },
+        { label: 'Something she said', placeholder: "The most memorable thing she's said to you recently (or ever). Might be ordinary, but it stuck with you…" }
+      ]
+    },
+    zh: {
+      tagline: "一份手作的母亲节心意",
+      step1_title: "选择你的花",
+      step1_hint: "每朵花都有它的寓意",
+      flowerCounterText: () => "朵 · 组成你的花束",
+      step2_title: "让它有温度",
+      fieldTo: "致",
+      fieldMsg: "想对她说",
+      fieldFrom: "来自",
+      promptHint: "不知道写什么? 挑一个角度入手:",
+      promptCycle: "换一组 ↻",
+      step3_title: "送出去吧",
+      btnShare: "✦ 寄给妈妈 →",
+      btnReveal: "预览开箱动画",
+      btnDownload: "下载图片",
+      btnDownloading: "正在渲染…",
+      photoHint: "📸 点下方 Polaroid 上传跟妈妈的合照",
+      polaroidAdd: "+ 加一张<br>跟妈妈的合照",
+      polaroidTapUpload: "点击上传",
+      polaroidWithMom: "我和妈妈 ♡",
+      backGreeting: (r) => `亲爱的 ${r},`,
+      backSignature: "— 爱你的,",
+      revealHint: "点蜡章打开 ✦",
+      toastDownload: "图片已下载 ✓",
+      shareTitle: "卡片好啦 ✦",
+      shareSub: "把这条链接发给妈妈 — 她一打开就能看到信封。",
+      btnCopyLink: "复制链接",
+      btnCopied: "已复制 ✓",
+      btnCopyManual: "按 Cmd/Ctrl+C 复制",
+      btnPreviewAsMom: "以妈妈视角预览 ↗",
+      shareNote1: "请只分享给收件人 — 这是为她做的。",
+      shareNote2: "卡片数据全部编在链接里, 不存任何后端。",
+      shareNoteLongUrl: "(注意:含照片时链接会很长。建议用邮件或微信发,部分应用可能截断。)",
+      promptSetA: [
+        { label: '行李箱', placeholder: '上次回家妈给你塞了什么你其实不需要的东西? 她当时是怎么说的? 你后来用上了吗?' },
+        { label: '一道菜', placeholder: '她做的某道菜你一直没学会, 每次想到就软一下心。写写它的味道、你最想念它的某个瞬间…' },
+        { label: '她的笨拙', placeholder: '她最近发的最让你笑出来的表情包, 或一个她一直学不会的 app。她不熟悉这个时代, 但还在努力跟上你的节奏…' },
+        { label: '没注意到的事', placeholder: '一件你早就习惯、从没好好谢过的小事。比如总是把你不爱吃的菜挑走、半夜偷偷把你充电器插好…' },
+        { label: '你也开始像她', placeholder: '你最近做了一件事, 突然发现"啊, 我妈也是这样"。可能是某句口头禅, 可能是某个习惯…' },
+        { label: '没说出口的话', placeholder: '一件你心里想跟她说很久, 一直没找到机会的事。今天可以借这张卡说出来…' }
+      ],
+      promptSetB: [
+        { label: '她以前的样子', placeholder: '翻到她年轻时的相册, 有没有一张特别打动你? 那时候她在做什么、笑得什么样?' },
+        { label: '她最近问你', placeholder: '她最近问过你的一句话(可能是"微信怎么转账"、"你瘦了吗"、"今天晚上几点回")。那一刻你听到时, 心里在想什么?' },
+        { label: '她不再做的事', placeholder: '她以前会做、现在不再做的一件事。可能是熬夜追剧、可能是争论对错、可能是穿那条她最爱的裙子…' },
+        { label: '你最让她开心的事', placeholder: '你最近一次让她特别开心是因为什么? 一通电话、一张照片、一句"这周回来吃饭"?' },
+        { label: '只有一句', placeholder: '如果今年只能跟她说一句话, 你想让她记住什么? 不用宏大, 越具体越真。' },
+        { label: '她的某句话', placeholder: '她最近(或这辈子)说过让你印象最深的一句话。那句话可能很普通, 但你一直记着…' }
+      ]
+    }
+  };
+
+  let currentLang = (() => {
+    try { return localStorage.getItem('lang') || 'en'; } catch (e) { return 'en'; }
+  })();
+
+  function t(key, ...args) {
+    const v = (i18n[currentLang] && i18n[currentLang][key]) ?? i18n.en[key] ?? key;
+    return typeof v === 'function' ? v(...args) : v;
+  }
+
+  function applyLanguage(lang) {
+    currentLang = lang;
+    document.documentElement.lang = (lang === 'zh' ? 'zh-CN' : 'en');
+    document.body.classList.remove('lang-en', 'lang-zh');
+    document.body.classList.add('lang-' + lang);
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const v = i18n[lang] && i18n[lang][el.dataset.i18n];
+      if (typeof v === 'string') el.innerHTML = v;
+    });
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+    // Re-render anything that's built from JS strings (functions are hoisted)
+    if (typeof renderFlowerPicker === 'function') renderFlowerPicker();
+    if (typeof updateCounter === 'function') updateCounter();
+    if (typeof renderPromptChips === 'function') renderPromptChips();
+    if (typeof renderCard === 'function') renderCard();
+  }
+
+  function setLang(lang) {
+    try { localStorage.setItem('lang', lang); } catch (e) {}
+    applyLanguage(lang);
+  }
 
   /* ============== FLOWER LIBRARY ============== */
   // Watercolor aesthetic: cream-centered radial gradients, soft pastel palette,
@@ -1294,12 +1523,12 @@
 
   /* ============== FLOWER PICKER UI ============== */
   function renderFlowerPicker() {
+    const isZh = currentLang === 'zh';
     flowersContainer.innerHTML = Object.entries(flowers).map(([key, f]) => `
       <div class="flower ${selectedFlowers.includes(key) ? 'selected' : ''}" data-flower="${key}">
         <div class="flower-icon">${f.svg(56)}</div>
-        <div class="flower-name">${f.name}</div>
-        <div class="flower-cn">${f.cn}</div>
-        <div class="flower-meaning">${f.meaning}<br><span style="font-family:'Noto Serif SC',serif;">${f.cnMeaning}</span></div>
+        <div class="${isZh ? 'flower-cn' : 'flower-name'}">${isZh ? f.cn : f.name}</div>
+        <div class="flower-meaning"${isZh ? ` style="font-family:'Noto Serif SC',serif;"` : ''}>${isZh ? f.cnMeaning : f.meaning}</div>
       </div>
     `).join('');
 
@@ -1323,7 +1552,8 @@
   }
   function updateCounter() {
     flowerCountEl.textContent = selectedFlowers.length;
-    flowerPluralEl.textContent = selectedFlowers.length === 1 ? '' : 's';
+    const txt = document.getElementById('flowerCounterText');
+    if (txt) txt.textContent = t('flowerCounterText', selectedFlowers.length);
   }
 
   /* ============== TEMPLATES ============== */
@@ -1348,13 +1578,13 @@
             <div class="polaroid" data-polaroid>
               ${userPhoto
                 ? `<div class="polaroid-photo"><img src="${userPhoto}" alt="with mom" draggable="false"/></div>`
-                : `<div class="polaroid-photo polaroid-empty"><span>+ add a photo<br>with mom</span></div>`}
-              <div class="polaroid-caption">${userPhoto ? 'us ♡' : 'tap to upload'}</div>
+                : `<div class="polaroid-photo polaroid-empty"><span>${t('polaroidAdd')}</span></div>`}
+              <div class="polaroid-caption">${userPhoto ? t('polaroidWithMom') : t('polaroidTapUpload')}</div>
             </div>
-            <div class="back-greeting">Dear ${r},</div>
+            <div class="back-greeting">${t('backGreeting', r)}</div>
             <div class="back-message">${m}</div>
             <div class="back-signature">
-              <div class="from">— with love,</div>
+              <div class="from">${t('backSignature')}</div>
               <div class="name">${s}</div>
             </div>
           </div>
@@ -1375,8 +1605,14 @@
     const r = escapeHtml(recipientInput.value || 'Mom');
     const m = escapeHtml(messageInput.value || '');
     const s = escapeHtml(senderInput.value || '');
+    const html = templates[currentTpl](r, m, s);
     card.className = 'card ' + currentTpl;
-    card.innerHTML = templates[currentTpl](r, m, s);
+    card.innerHTML = html;
+    // Mobile inline previews — same DOM, CSS hides one face in each slot
+    const pf = document.getElementById('previewFront');
+    const pb = document.getElementById('previewBack');
+    if (pf) { pf.className = 'step-preview card ' + currentTpl; pf.innerHTML = html; }
+    if (pb) { pb.className = 'step-preview card ' + currentTpl; pb.innerHTML = html; }
     countEl.textContent = messageInput.value.length;
   }
 
@@ -1527,7 +1763,7 @@
   /* ============== DOWNLOAD ============== */
   document.getElementById('downloadBtn').addEventListener('click', async (e) => {
     const btn = e.currentTarget;
-    btn.textContent = 'Rendering...';
+    btn.textContent = t('btnDownloading');
     btn.disabled = true;
     try {
       const canvas = await html2canvas(card, {
@@ -1551,50 +1787,34 @@
       link.click();
       const rect = btn.getBoundingClientRect();
       celebrationBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
-      showToast('Image downloaded ✓');
+      showToast(t('toastDownload'));
     } catch (err) {
       showToast('Something went wrong');
       console.error(err);
     } finally {
-      btn.textContent = 'Download as image';
+      btn.textContent = t('btnDownload');
       btn.disabled = false;
     }
   });
 
   /* ============== PROMPT STARTERS ============== */
-  const PROMPT_SETS = [
-    [
-      { label: '行李箱', placeholder: '上次回家妈给你塞了什么你其实不需要的东西? 她当时是怎么说的? 你后来用上了吗?' },
-      { label: '一道菜', placeholder: '她做的某道菜你一直没学会, 每次想到就软一下心。写写它的味道、你最想念它的某个瞬间…' },
-      { label: '她的笨拙', placeholder: '她最近发的最让你笑出来的表情包, 或一个她一直学不会的 app。她不熟悉这个时代, 但还在努力跟上你的节奏…' },
-      { label: '没注意到的事', placeholder: '一件你早就习惯、从没好好谢过的小事。比如总是把你不爱吃的菜挑走、半夜偷偷把你充电器插好…' },
-      { label: '你也开始像她', placeholder: '你最近做了一件事, 突然发现"啊, 我妈也是这样"。可能是某句口头禅, 可能是某个习惯…' },
-      { label: '没说出口的话', placeholder: '一件你心里想跟她说很久, 一直没找到机会的事。今天可以借这张卡说出来…' },
-    ],
-    [
-      { label: '她以前的样子', placeholder: '翻到她年轻时的相册, 有没有一张特别打动你? 那时候她在做什么、笑得什么样?' },
-      { label: '她最近问你', placeholder: '她最近问过你的一句话(可能是"微信怎么转账"、"你瘦了吗"、"今天晚上几点回")。那一刻你听到时, 心里在想什么?' },
-      { label: '她不再做的事', placeholder: '她以前会做、现在不再做的一件事。可能是熬夜追剧、可能是争论对错、可能是穿那条她最爱的裙子…' },
-      { label: '你最让她开心的事', placeholder: '你最近一次让她特别开心是因为什么? 一通电话、一张照片、一句"这周回来吃饭"?' },
-      { label: '只有一句', placeholder: '如果今年只能跟她说一句话, 你想让她记住什么? 不用宏大, 越具体越真。' },
-      { label: '她的某句话', placeholder: '她最近(或这辈子)说过让你印象最深的一句话。那句话可能很普通, 但你一直记着…' },
-    ],
-  ];
+  // Prompt sets live in the i18n dictionary (promptSetA / promptSetB per language)
+  const PROMPT_KEYS = ['promptSetA', 'promptSetB'];
   let promptSetIdx = 0;
   let activePromptIdx = -1;
   const promptChipsEl = document.getElementById('promptChips');
 
   function renderPromptChips() {
-    const set = PROMPT_SETS[promptSetIdx];
+    const set = t(PROMPT_KEYS[promptSetIdx]);
     promptChipsEl.innerHTML = set.map((p, i) =>
       `<button class="prompt-chip${i === activePromptIdx ? ' active' : ''}" data-i="${i}">${p.label}</button>`
-    ).join('') + `<button class="prompt-chip cycle" data-cycle>换一组 ↻</button>`;
+    ).join('') + `<button class="prompt-chip cycle" data-cycle>${t('promptCycle')}</button>`;
 
     promptChipsEl.querySelectorAll('[data-i]').forEach(btn => {
       btn.addEventListener('click', () => {
         const i = parseInt(btn.dataset.i, 10);
         activePromptIdx = i;
-        const p = PROMPT_SETS[promptSetIdx][i];
+        const p = t(PROMPT_KEYS[promptSetIdx])[i];
         messageInput.placeholder = p.placeholder;
         // Don't overwrite existing text — only show prompt as placeholder.
         // If textarea already has the default seed text, clear it so the placeholder shows.
@@ -1607,7 +1827,7 @@
       });
     });
     promptChipsEl.querySelector('[data-cycle]').addEventListener('click', () => {
-      promptSetIdx = (promptSetIdx + 1) % PROMPT_SETS.length;
+      promptSetIdx = (promptSetIdx + 1) % PROMPT_KEYS.length;
       activePromptIdx = -1;
       renderPromptChips();
     });
@@ -1636,6 +1856,7 @@
       m: messageInput.value,
       s: senderInput.value,
       f: selectedFlowers,
+      l: currentLang,           // language travels with the share link
     };
     if (userPhoto) state.p = userPhoto;  // photo is already a compressed JPEG data URL
     const json = JSON.stringify(state);
@@ -1663,6 +1884,7 @@
     senderInput.value = state.s || '';
     selectedFlowers = (Array.isArray(state.f) && state.f.length) ? state.f : ['carnation'];
     userPhoto = state.p || null;
+    if (state.l === 'en' || state.l === 'zh') currentLang = state.l;
   }
 
   /* ============== SHARE FLOW ============== */
@@ -1686,9 +1908,9 @@
     shareModal.classList.add('show');
     // Warn if URL is suspiciously long (mostly due to polaroid photo)
     if (url.length > 8000) {
-      const note = shareModal.querySelector('.share-note');
-      const big = userPhoto ? ' (Heads up: your photo makes this link long. Some apps may struggle — email or WhatsApp work best.)' : '';
-      note.innerHTML = note.innerHTML.split('<br>')[0] + big + '<br>The card data lives in the link itself, nothing\'s saved anywhere.';
+      const note = document.getElementById('shareNote');
+      const warn = userPhoto ? ' ' + t('shareNoteLongUrl') : '';
+      note.innerHTML = `<span data-i18n="shareNote1">${t('shareNote1')}</span>${warn}<br><span data-i18n="shareNote2">${t('shareNote2')}</span>`;
     }
   });
 
@@ -1701,15 +1923,15 @@
     const url = buildShareURL();
     try {
       await navigator.clipboard.writeText(url);
-      copyShareBtn.textContent = 'Copied ✓';
-      setTimeout(() => copyShareBtn.textContent = 'Copy link', 2000);
+      copyShareBtn.textContent = t('btnCopied');
+      setTimeout(() => copyShareBtn.textContent = t('btnCopyLink'), 2000);
     } catch (e) {
       // Fallback: select the URL box for manual copy
       const range = document.createRange();
       range.selectNode(shareUrlBox);
       window.getSelection().removeAllRanges();
       window.getSelection().addRange(range);
-      copyShareBtn.textContent = 'Press Cmd/Ctrl+C';
+      copyShareBtn.textContent = t('btnCopyManual');
     }
   });
 
@@ -1731,11 +1953,17 @@
   });
 
   /* ============== INIT ============== */
+  // Language switcher wiring + initial apply (after all renderers are defined)
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => setLang(btn.dataset.lang));
+  });
+
   renderFlowerPicker();
   updateCounter();
   applyBackgroundFromFlowers();
   renderCard();
   regenerateParticles();
+  applyLanguage(currentLang);   // re-pass: swap static labels + re-render dynamic UI in the saved language
 
   // In receiver mode, automatically open the envelope after a brief moment
   if (initialState) {
