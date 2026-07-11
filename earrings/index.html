@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>One & Only — Sell Your Solo Earring</title>
+<meta name="description" content="A tiny marketplace for the earring that lost its other half. List it, find it, love it again." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fbf3ee;
+    --card: #ffffff;
+    --ink: #2c2321;
+    --ink-soft: #7a6a63;
+    --line: #ecdcd3;
+    --accent: #c1546e;
+    --accent-soft: #e8a6b6;
+    --accent-deep: #9c3c53;
+    --gold: #c99a4a;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  button { font-family: inherit; cursor: pointer; }
+  input, textarea, select { font-family: inherit; }
+
+  header {
+    padding: 28px 24px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: rgba(251,243,238,0.92);
+    backdrop-filter: blur(6px);
+    z-index: 20;
+  }
+  .brand {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 24px;
+    color: var(--accent-deep);
+  }
+  .brand span { font-style: normal; font-weight: 600; color: var(--ink); }
+  .brand-tag {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-style: normal;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+  nav { display: flex; gap: 10px; }
+  .btn {
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent-deep); }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .btn.primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); color: #fff; }
+
+  main { max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
+
+  .hero {
+    text-align: center;
+    padding: 56px 12px 40px;
+  }
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(30px, 5vw, 46px);
+    line-height: 1.15;
+    max-width: 640px;
+    margin: 0 auto 14px;
+  }
+  .hero h1 em { color: var(--accent-deep); font-style: italic; }
+  .hero p {
+    color: var(--ink-soft);
+    font-size: 16px;
+    max-width: 460px;
+    margin: 0 auto 26px;
+  }
+  .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    margin: 12px 0 18px;
+    flex-wrap: wrap;
+  }
+  .section-head h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 24px;
+  }
+  .section-head p { color: var(--ink-soft); font-size: 13px; }
+
+  .filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+  .filters input[type="text"] {
+    flex: 1 1 200px;
+    padding: 11px 16px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--card);
+    font-size: 14px;
+    outline: none;
+  }
+  .filters input[type="text"]:focus { border-color: var(--accent-soft); }
+  .filters select {
+    padding: 11px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--card);
+    font-size: 14px;
+    outline: none;
+    color: var(--ink);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 18px;
+  }
+  .listing-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .listing-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(156, 60, 83, 0.12);
+  }
+  .listing-thumb {
+    aspect-ratio: 1 / 1;
+    background: #f4e6df;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .listing-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .listing-thumb .placeholder { font-size: 40px; opacity: 0.5; }
+  .listing-body { padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .listing-title { font-weight: 600; font-size: 14.5px; line-height: 1.3; }
+  .listing-meta { font-size: 12px; color: var(--ink-soft); text-transform: capitalize; }
+  .listing-price { margin-top: auto; font-family: 'Fraunces', serif; font-weight: 600; font-size: 18px; color: var(--accent-deep); }
+  .badge {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: #f4e0e6;
+    color: var(--accent-deep);
+    padding: 3px 8px;
+    border-radius: 999px;
+    width: fit-content;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-soft);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+  }
+  .empty-state p { margin-bottom: 16px; }
+
+  /* Modal */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(44, 35, 33, 0.45);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: 20px;
+    max-width: 460px;
+    width: 100%;
+    padding: 28px;
+    position: relative;
+    animation: pop 0.2s ease;
+  }
+  @keyframes pop { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--ink-soft);
+    line-height: 1;
+  }
+  .modal h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 22px;
+    margin-bottom: 18px;
+    padding-right: 20px;
+  }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--ink-soft);
+  }
+  .field input[type="text"],
+  .field input[type="number"],
+  .field textarea,
+  .field select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    background: #fffdfc;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent-soft); }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .photo-input {
+    border: 1.5px dashed var(--line);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-size: 13px;
+    position: relative;
+    overflow: hidden;
+  }
+  .photo-input.has-image { padding: 0; border-style: solid; }
+  .photo-input img { width: 100%; max-height: 220px; object-fit: cover; }
+  .photo-input input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  }
+
+  .detail-photo {
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #f4e6df;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .detail-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-photo .placeholder { font-size: 52px; opacity: 0.5; }
+  .detail-price { font-family: 'Fraunces', serif; font-weight: 600; font-size: 26px; color: var(--accent-deep); margin: 6px 0 10px; }
+  .detail-desc { font-size: 14px; line-height: 1.6; color: var(--ink); margin-bottom: 18px; white-space: pre-wrap; }
+  .seller-box {
+    background: #faf1ee;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+  .seller-box .label { font-size: 11.5px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .seller-box .value { font-weight: 600; font-size: 14.5px; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 200;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .my-listing-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .my-listing-row:last-child { border-bottom: none; }
+  .my-listing-row .del {
+    background: none;
+    border: none;
+    color: var(--accent-deep);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  footer {
+    text-align: center;
+    padding: 30px 20px 50px;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 20px 16px; }
+    .brand { font-size: 20px; }
+    .field-row { grid-template-columns: 1fr; }
+    nav .btn span.long { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">One <span>&amp; Only</span><span class="brand-tag">a home for your solo earring</span></div>
+  <nav>
+    <button class="btn" id="myListingsBtn">My listings</button>
+    <button class="btn primary" id="sellBtn">+ Sell mine</button>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>Got <em>one</em> earring left?<br>Find the person who wants it.</h1>
+    <p>Lost its pair, changed your mind, or only ever bought a single — list it in a minute and let someone give it a second life.</p>
+    <div class="hero-actions">
+      <button class="btn primary" id="heroSellBtn">List my earring</button>
+      <button class="btn" id="heroBrowseBtn">Browse listings</button>
+    </div>
+  </section>
+
+  <section id="browse">
+    <div class="section-head">
+      <div>
+        <h2>Browse solo earrings</h2>
+        <p id="countLabel">Loading…</p>
+      </div>
+    </div>
+    <div class="filters">
+      <input type="text" id="searchInput" placeholder="Search by style, stone, material…" />
+      <select id="typeFilter">
+        <option value="">All types</option>
+        <option value="stud">Stud</option>
+        <option value="hoop">Hoop</option>
+        <option value="dangle">Dangle / Drop</option>
+        <option value="huggie">Huggie</option>
+        <option value="ear cuff">Ear cuff</option>
+        <option value="other">Other</option>
+      </select>
+      <select id="sortFilter">
+        <option value="new">Newest</option>
+        <option value="low">Price: low to high</option>
+        <option value="high">Price: high to low</option>
+      </select>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+
+<footer>One &amp; Only — a tiny MVP marketplace. Listings are stored on this device only.</footer>
+
+<!-- Sell Modal -->
+<div class="overlay" id="sellOverlay">
+  <div class="modal">
+    <button class="modal-close" data-close="sellOverlay">&times;</button>
+    <h3>List your earring</h3>
+    <form id="sellForm">
+      <div class="field">
+        <label>Photo</label>
+        <label class="photo-input" id="photoInputWrap">
+          <span id="photoInputText">Tap to add a photo</span>
+          <input type="file" accept="image/*" id="photoInput" />
+        </label>
+      </div>
+      <div class="field">
+        <label>Title</label>
+        <input type="text" id="fTitle" placeholder="e.g. Gold huggie hoop, small" required maxlength="60" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Type</label>
+          <select id="fType">
+            <option value="stud">Stud</option>
+            <option value="hoop">Hoop</option>
+            <option value="dangle">Dangle / Drop</option>
+            <option value="huggie">Huggie</option>
+            <option value="ear cuff">Ear cuff</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Price (USD)</label>
+          <input type="number" id="fPrice" min="0" step="0.01" placeholder="12" required />
+        </div>
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea id="fDesc" placeholder="Material, condition, why it's solo, ear (left/right)…" maxlength="400"></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Your name</label>
+          <input type="text" id="fName" placeholder="First name" required maxlength="40" />
+        </div>
+        <div class="field">
+          <label>Contact (email or IG)</label>
+          <input type="text" id="fContact" placeholder="you@email.com or @handle" required maxlength="80" />
+        </div>
+      </div>
+      <button type="submit" class="btn primary" style="width:100%; padding:13px; font-size:14px;">Post listing</button>
+    </form>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal" id="detailModalBody"></div>
+</div>
+
+<!-- My Listings Modal -->
+<div class="overlay" id="myListingsOverlay">
+  <div class="modal">
+    <button class="modal-close" data-close="myListingsOverlay">&times;</button>
+    <h3>My listings</h3>
+    <div id="myListingsList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'oao_listings_v1';
+  const OWNER_KEY = 'oao_owner_id';
+
+  function getOwnerId() {
+    let id = localStorage.getItem(OWNER_KEY);
+    if (!id) {
+      id = 'u_' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem(OWNER_KEY, id);
+    }
+    return id;
+  }
+  const ownerId = getOwnerId();
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+  }
+
+  function seedListings() {
+    return [
+      {
+        id: 'seed1', title: 'Pearl drop, lost its twin', type: 'dangle', price: 14,
+        desc: 'Freshwater pearl on gold-plated hook. Right ear only — left one vanished at a party. Barely worn.',
+        name: 'Maya', contact: '@maya.finds', photo: '', created: Date.now() - 86400000 * 2, owner: 'seed'
+      },
+      {
+        id: 'seed2', title: 'Tiny gold huggie', type: 'huggie', price: 8,
+        desc: '9k gold-plated huggie hoop, 8mm. Bought as a pair, only ever liked wearing one high up on my ear.',
+        name: 'Priya', contact: 'priya.sells@gmail.com', photo: '', created: Date.now() - 86400000 * 5, owner: 'seed'
+      },
+      {
+        id: 'seed3', title: 'Silver star stud', type: 'stud', price: 6,
+        desc: 'Sterling silver star stud, tiny and cute. Backing included. Selling the one I have left.',
+        name: 'Elle', contact: '@elle.wears', photo: '', created: Date.now() - 86400000, owner: 'seed'
+      }
+    ];
+  }
+
+  function loadListings() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    const seeded = seedListings();
+    saveListings(seeded);
+    return seeded;
+  }
+  function saveListings(list) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  let listings = loadListings();
+
+  const grid = document.getElementById('grid');
+  const countLabel = document.getElementById('countLabel');
+  const searchInput = document.getElementById('searchInput');
+  const typeFilter = document.getElementById('typeFilter');
+  const sortFilter = document.getElementById('sortFilter');
+
+  function typeLabel(t) {
+    return t === 'dangle' ? 'Dangle / Drop' : t === 'ear cuff' ? 'Ear cuff' : t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  function render() {
+    const q = searchInput.value.trim().toLowerCase();
+    const type = typeFilter.value;
+    let items = listings.filter(l => {
+      if (type && l.type !== type) return false;
+      if (q && !(l.title.toLowerCase().includes(q) || l.desc.toLowerCase().includes(q))) return false;
+      return true;
+    });
+    if (sortFilter.value === 'low') items.sort((a, b) => a.price - b.price);
+    else if (sortFilter.value === 'high') items.sort((a, b) => b.price - a.price);
+    else items.sort((a, b) => b.created - a.created);
+
+    countLabel.textContent = items.length + (items.length === 1 ? ' earring waiting for a new home' : ' earrings waiting for new homes');
+
+    if (!items.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+        <p>No listings match yet.</p>
+        <button class="btn primary" id="emptySellBtn">List the first one</button>
+      </div>`;
+      document.getElementById('emptySellBtn').onclick = openSellModal;
+      return;
+    }
+
+    grid.innerHTML = items.map(l => `
+      <div class="listing-card" data-id="${l.id}">
+        <div class="listing-thumb">
+          ${l.photo ? `<img src="${l.photo}" alt="${escapeHtml(l.title)}" />` : `<span class="placeholder">💎</span>`}
+        </div>
+        <div class="listing-body">
+          <span class="badge">${typeLabel(l.type)}</span>
+          <div class="listing-title">${escapeHtml(l.title)}</div>
+          <div class="listing-meta">by ${escapeHtml(l.name)}</div>
+          <div class="listing-price">$${Number(l.price).toFixed(2)}</div>
+        </div>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.listing-card').forEach(card => {
+      card.addEventListener('click', () => openDetail(card.dataset.id));
+    });
+  }
+
+  searchInput.addEventListener('input', render);
+  typeFilter.addEventListener('change', render);
+  sortFilter.addEventListener('change', render);
+
+  // ---- Detail modal ----
+  const detailOverlay = document.getElementById('detailOverlay');
+  const detailModalBody = document.getElementById('detailModalBody');
+
+  function contactHref(contact) {
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) {
+      return { href: 'mailto:' + contact, label: 'Email seller' };
+    }
+    return null;
+  }
+
+  function openDetail(id) {
+    const l = listings.find(x => x.id === id);
+    if (!l) return;
+    const mail = contactHref(l.contact);
+    detailModalBody.innerHTML = `
+      <button class="modal-close" data-close="detailOverlay">&times;</button>
+      <div class="detail-photo">
+        ${l.photo ? `<img src="${l.photo}" alt="${escapeHtml(l.title)}" />` : `<span class="placeholder">💎</span>`}
+      </div>
+      <span class="badge">${typeLabel(l.type)}</span>
+      <h3 style="margin-top:8px;">${escapeHtml(l.title)}</h3>
+      <div class="detail-price">$${Number(l.price).toFixed(2)}</div>
+      <div class="detail-desc">${escapeHtml(l.desc || 'No description provided.')}</div>
+      <div class="seller-box">
+        <div class="label">Seller</div>
+        <div class="value">${escapeHtml(l.name)}</div>
+        <div class="label" style="margin-top:8px;">Contact</div>
+        <div class="value">${escapeHtml(l.contact)}</div>
+      </div>
+      ${mail
+        ? `<a class="btn primary" style="display:block; text-align:center; padding:13px;" href="${mail.href}?subject=${encodeURIComponent('About your listing: ' + l.title)}">${mail.label}</a>`
+        : `<button class="btn primary" style="width:100%; padding:13px;" id="copyContactBtn">Copy contact info</button>`
+      }
+    `;
+    detailOverlay.classList.add('open');
+    if (!mail) {
+      document.getElementById('copyContactBtn').onclick = () => {
+        navigator.clipboard?.writeText(l.contact).then(() => showToast('Contact copied — reach out on ' + l.contact));
+      };
+    }
+    detailModalBody.querySelector('[data-close]').onclick = () => closeOverlay('detailOverlay');
+  }
+
+  // ---- Sell modal ----
+  const sellOverlay = document.getElementById('sellOverlay');
+  const sellForm = document.getElementById('sellForm');
+  const photoInput = document.getElementById('photoInput');
+  const photoInputWrap = document.getElementById('photoInputWrap');
+  const photoInputText = document.getElementById('photoInputText');
+  let pendingPhoto = '';
+
+  function handlePhotoChange(e) {
+    const input = e.target;
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) {
+      showToast('Photo too large — please use one under 4MB');
+      input.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      pendingPhoto = ev.target.result;
+      photoInputWrap.classList.add('has-image');
+      photoInputWrap.innerHTML = `<img src="${pendingPhoto}" alt="preview" /><input type="file" accept="image/*" id="photoInput" />`;
+      document.getElementById('photoInput').addEventListener('change', handlePhotoChange);
+    };
+    reader.readAsDataURL(file);
+  }
+  photoInput.addEventListener('change', handlePhotoChange);
+
+  function openSellModal() {
+    sellOverlay.classList.add('open');
+  }
+  document.getElementById('sellBtn').onclick = openSellModal;
+  document.getElementById('heroSellBtn').onclick = openSellModal;
+  document.getElementById('heroBrowseBtn').onclick = () => document.getElementById('browse').scrollIntoView({ behavior: 'smooth' });
+
+  sellForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const title = document.getElementById('fTitle').value.trim();
+    const type = document.getElementById('fType').value;
+    const price = parseFloat(document.getElementById('fPrice').value);
+    const desc = document.getElementById('fDesc').value.trim();
+    const name = document.getElementById('fName').value.trim();
+    const contact = document.getElementById('fContact').value.trim();
+
+    if (!title || !name || !contact || isNaN(price) || price < 0) {
+      showToast('Please fill in all required fields');
+      return;
+    }
+
+    const listing = {
+      id: 'l_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      title, type, price, desc, name, contact,
+      photo: pendingPhoto,
+      created: Date.now(),
+      owner: ownerId
+    };
+    listings.unshift(listing);
+    saveListings(listings);
+    render();
+
+    sellForm.reset();
+    pendingPhoto = '';
+    photoInputWrap.classList.remove('has-image');
+    photoInputWrap.innerHTML = `<span id="photoInputText">Tap to add a photo</span><input type="file" accept="image/*" id="photoInput" />`;
+    document.getElementById('photoInput').addEventListener('change', handlePhotoChange);
+
+    closeOverlay('sellOverlay');
+    showToast('Listed! Your earring is live.');
+  });
+
+  // ---- My listings ----
+  const myListingsOverlay = document.getElementById('myListingsOverlay');
+  const myListingsList = document.getElementById('myListingsList');
+
+  function renderMyListings() {
+    const mine = listings.filter(l => l.owner === ownerId);
+    if (!mine.length) {
+      myListingsList.innerHTML = `<p style="color:var(--ink-soft); font-size:13.5px;">You haven't listed anything yet. Listings you post from this device will show up here.</p>`;
+      return;
+    }
+    myListingsList.innerHTML = mine.map(l => `
+      <div class="my-listing-row">
+        <span>${escapeHtml(l.title)} — $${Number(l.price).toFixed(2)}</span>
+        <button class="del" data-id="${l.id}">Remove</button>
+      </div>
+    `).join('');
+    myListingsList.querySelectorAll('.del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        listings = listings.filter(l => l.id !== btn.dataset.id);
+        saveListings(listings);
+        render();
+        renderMyListings();
+        showToast('Listing removed');
+      });
+    });
+  }
+
+  document.getElementById('myListingsBtn').onclick = () => {
+    renderMyListings();
+    myListingsOverlay.classList.add('open');
+  };
+
+  // ---- Overlay close handling ----
+  function closeOverlay(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+  document.querySelectorAll('[data-close]').forEach(btn => {
+    btn.addEventListener('click', () => closeOverlay(btn.dataset.close));
+  });
+  document.querySelectorAll('.overlay').forEach(ov => {
+    ov.addEventListener('click', e => {
+      if (e.target === ov) closeOverlay(ov.id);
+    });
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(ov => ov.classList.remove('open'));
+  });
+
+  // ---- Toast ----
+  let toastTimer;
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
